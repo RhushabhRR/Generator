@@ -22,7 +22,7 @@ public:
     virtual bool SendFrame() = 0;
 };
 
-class CanGenerator : public Generator
+class CanTpGenerator : public Generator
 {
 
 public:

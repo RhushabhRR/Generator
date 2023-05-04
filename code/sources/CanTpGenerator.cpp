@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "CanGenerator.h"
+#include "CanTpGenerator.h"
 
 int main()
 {

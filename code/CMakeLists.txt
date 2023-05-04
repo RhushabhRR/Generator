@@ -1,30 +1,33 @@
 
 
-set(_LIB CanGenerator)
+set(_LIB CanTpGenerator)
 
 set(_INCLUDE_DIRECTORIES
     "${CMAKE_CURRENT_SOURCE_DIR}/api"
     )
 
 set(_HEADERS 
-    "${CMAKE_CURRENT_SOURCE_DIR}/api/CanGenerator.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/api/CanTpGenerator.h"
     )
 
 set(_SOURCES 
-    "${CMAKE_CURRENT_SOURCE_DIR}/sources/CanGenerator.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sources/CanTpGenerator.cpp"
     )
 
-add_library(CanGenerator sources/CanGenerator.cpp)
+#Create libraries
+add_library(${_LIB} STATIC ${_SOURCES})
 
+#Include Directories for headers
 target_include_directories(${_LIB} PUBLIC ${_INCLUDE_DIRECTORIES})
-target_sources(${_LIB}
-    PRIVATE ${_SOURCES}
-    INTERFACE ${_HEADERS}
-    )
 
-##################
-add_executable(APP_CanGenerator ${_SOURCES})
-target_link_libraries(APP_CanGenerator ${_LIB})
+#Install libraries
+install(TARGETS ${_LIB} 
+        LIBRARY DESTINATION ${CMAKE_INSTALL_DIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-message ("included sources")
+        
+
+#Create executable
+add_executable(APP_CanTpGenerator ${_SOURCES})
+target_link_libraries(APP_CanTpGenerator ${_LIB})
 

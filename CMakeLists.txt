@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
+message ("-- CMAKE MINIMUM VERSION = 3.24")
 
-project(CanGenerator)
+project(CanTpGenerator)
 
 set(CMAKE_CXX_STANDARD 17)
 
