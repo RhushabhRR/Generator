@@ -1,0 +1,4 @@
+#pragma once
+
+#define CANTP_DEFAULT_BLOCK_SIZE 3
+#define CANTP_DEFAULT_SEPERATION_TIME 1
