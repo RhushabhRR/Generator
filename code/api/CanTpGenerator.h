@@ -10,7 +10,7 @@
 #define CANTP_PCI_CONSECUTIVE_FRAME 2
 #define CANTP_PCI_FLOWCONTROL_FRAME 3
 
-enum class frameType : uint8_t
+enum class CanTpFrames : uint8_t
 {
     CANTP_SINGLE_FRAME = 0,
     CANTP_FIRST_FRAME = 1,
@@ -19,23 +19,29 @@ enum class frameType : uint8_t
     TOTAL_FRAME_TYPES = 4
 };
 
-struct CanTpframeData
+struct CanTpProtocolData
 {
     uint8_t pciInfo; // Use '+' unary oerator to print uint8_t on console
     uint16_t maxPayloadLength;
 };
 
-class Generator
+class FrameGenerator
 {
 
 public:
-    virtual ~Generator(){};
+    virtual ~FrameGenerator(){};
 
     /**
-     * Generate frame
+     * @brief Generated Frame based on @param frameType
+     *
+     * @param frameType         Type of frame to be generated
+     * @param payloadLength     Length of paylaod in the frame (Protocol related data)
+     * @param defaultFillValue  Default value to be filled as payload
+     * @param frame             Frame to which values have to be filled
+     * @return bool
      */
-    virtual bool GenerateFrame(frameType frame, uint16_t payloadLength,
-                               uint8_t *payload) const = 0;
+    virtual bool GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, uint8_t defaultFillValue,
+                               std::vector<uint8_t> &frame) const = 0;
 
     /**
      * Read the JSON config file containing list of frames to be generated
@@ -48,27 +54,27 @@ public:
     virtual bool SendFrame() = 0;
 };
 
-class CanTpGenerator : public Generator
+class CanTpGenerator : public FrameGenerator
 {
 private:
     // Default Parameters
     uint16_t dataLength = 0;
     // std::vector<uint8_t> payload;
-    std::unordered_map<frameType, CanTpframeData> canTpFrameStructure;
+    std::unordered_map<CanTpFrames, CanTpProtocolData> CanTpFrameFormat;
 
 public:
     CanTpGenerator()
     {
-        canTpFrameStructure[frameType::CANTP_SINGLE_FRAME] = {CANTP_PCI_SINGLE_FRAME, 8};
-        canTpFrameStructure[frameType::CANTP_FIRST_FRAME] = {CANTP_PCI_FIRST_FRAME, 8};
-        canTpFrameStructure[frameType::CANTP_CONSECUTIVE_FRAME] = {CANTP_PCI_CONSECUTIVE_FRAME, 4096};
+        CanTpFrameFormat[CanTpFrames::CANTP_SINGLE_FRAME] = {CANTP_PCI_SINGLE_FRAME, 7};
+        CanTpFrameFormat[CanTpFrames::CANTP_FIRST_FRAME] = {CANTP_PCI_FIRST_FRAME, 4096};
+        CanTpFrameFormat[CanTpFrames::CANTP_CONSECUTIVE_FRAME] = {CANTP_PCI_CONSECUTIVE_FRAME, 4096};
     }
 
     ~CanTpGenerator(){};
 
 public:
-    virtual bool GenerateFrame(frameType frame, uint16_t payloadLength,
-                               uint8_t *payload) const override;
+    virtual bool GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, uint8_t defaultFillValue,
+                               std::vector<uint8_t> &frame) const override;
     virtual bool ReadConfig() override;
     virtual bool SendFrame() override;
 };
