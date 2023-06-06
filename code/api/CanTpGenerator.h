@@ -5,6 +5,9 @@
 
 #define CANTP_PCI_INFO_OFFSET 0
 #define CANTP_FF_DL_INFO_OFFSET 1
+#define CANTP_FC_CONTROLFLOW_OFFSET 0
+#define CANTP_FC_BLOCKSIZE_OFFSET 1
+#define CANTP_FC_STMIN_OFFSET 2
 
 #define CANTP_PCI_SINGLE_FRAME 0
 #define CANTP_PCI_FIRST_FRAME 1
@@ -47,8 +50,7 @@ public:
      * @param frame             Frame to which values have to be filled
      * @return bool
      */
-    virtual bool GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, uint8_t defaultFillValue,
-                               std::vector<uint8_t> &frame) const = 0;
+    virtual bool GenerateMsg(uint16_t msgLength, std::vector<std::vector<uint8_t>> &msg) = 0;
 
     /**
      * Read the JSON config file containing list of frames to be generated
@@ -69,36 +71,25 @@ private:
     uint8_t m_defaultFill = 0xcc;
     std::unordered_map<CanTpFrames, CanTpProtocolData> CanTpFrameFormat;
 
+    uint8_t m_fcFlag = 0;
+    uint8_t m_blockSize = 5;
+    uint8_t m_stmin = 10; // ms
+
+private:
+    uint16_t RequiredFrames(uint16_t msgLength);
+
 public:
     CanTpGenerator();
-
     ~CanTpGenerator(){};
 
-public:
-    virtual bool GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, uint8_t defaultFillValue,
-                               std::vector<uint8_t> &frame) const override;
+    virtual bool GenerateMsg(uint16_t msgLength, std::vector<std::vector<uint8_t>> &msg) override;
     virtual bool ReadConfig() override;
     virtual bool SendFrame() override;
 
-    /**
-     * @brief
-     *
-     * @param payloadLength
-     * @param defaultFillValue
-     * @param frame - Pass an empty vector as input
-     * @param seqNum - Used only for consecutive frame
-     * @return true
-     * @return false
-     */
-    bool GenerateFrame(uint16_t payloadLength, std::vector<std::vector<uint8_t>> &frame);
-
+    void SetConfigParam(uint8_t fcFlag, uint8_t blockSize, uint8_t stmin);
+    void GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, std::vector<uint8_t> &payload, uint8_t seqNum = 0xFF);
     void SetDefaultFillValue(uint8_t defaultFill)
     {
         m_defaultFill = defaultFill;
     }
-
-private:
-    void GeneratePayload(CanTpFrames frameType, uint16_t payloadLength, std::vector<uint8_t> &payload, uint8_t seqNum = 0xFF);
-
-    uint16_t RequiredFrames(uint16_t msgLength);
 };
