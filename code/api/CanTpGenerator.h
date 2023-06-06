@@ -36,23 +36,22 @@ typedef void (*pfGenerator)(uint16_t, std::vector<uint8_t> &);
 struct CanTpProtocolData
 {
     uint8_t pciInfo;
-    pfGenerator pfGenerateFrame; // Function to be called to generate payload
+    pfGenerator pfGenerateFrame; // Function to be called to generate frame
 };
 
 class FrameGenerator
 {
 
 public:
-    virtual ~FrameGenerator(){};
+    virtual ~FrameGenerator() {}
 
     /**
-     * @brief Generated Frame based on @param frameType
+     * @brief
      *
-     * @param frameType         Type of frame to be generated
-     * @param payloadLength     Length of paylaod in the frame (Protocol related data)
-     * @param defaultFillValue  Default value to be filled as payload
-     * @param frame             Frame to which values have to be filled
-     * @return bool
+     * @param msgLength - Length of overall message to be generated
+     * @param msg - Provide an empty 2D Vector - [frame][data] - will be resized inside the method
+     * @return true
+     * @return false
      */
     virtual bool GenerateMsg(uint16_t msgLength, std::vector<std::vector<uint8_t>> &msg) = 0;
 
@@ -86,12 +85,59 @@ public:
     CanTpGenerator();
     ~CanTpGenerator(){};
 
+    /**
+     * @brief
+     *
+     * @param msgLength - Length of overall message to be generated
+     * @param msg - Provide an empty 2D Vector - [frame][data] - will be resized inside the method
+     * @return true
+     * @return false
+     */
     virtual bool GenerateMsg(uint16_t msgLength, std::vector<std::vector<uint8_t>> &msg) override;
+
+    /**
+     * @brief Unused - Intended for future use
+     *
+     * @return true
+     * @return false
+     */
     virtual bool ReadConfig() override;
+
+    /**
+     * @brief Unused - Intended for future use
+     *
+     * @return true
+     * @return false
+     */
     virtual bool SendFrame() override;
 
+    /**
+     * @brief Set the Config Parameters used for Generation of Flow Control Frame
+     *
+     * @param fcFlag - Control Flow flag (0/1/2)
+     * @param blockSize - BlockSize
+     * @param stmin - Minimum Separation Time in ms
+     */
     void SetConfigParam(uint8_t fcFlag, uint8_t blockSize, uint8_t stmin);
-    void GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, std::vector<uint8_t> &payload, uint8_t seqNum = 0xFF);
+
+    /**
+     * @brief Generate a CanTp Frame based on @ref frameType
+     *
+     * @param frameType - Type of CanTp frame to be generated
+     * @param payloadLength - Length of payload in corresponding CanTp frame. F
+     * @note - For flow control frame - @ref payloadLength is unused
+     * @param payload - an empty vector in which frame will be generated
+     * @param seqNum - Used only for Consecutive frame
+     * @return true
+     * @return false
+     */
+    bool GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, std::vector<uint8_t> &payload, uint8_t seqNum = 0xFF);
+
+    /**
+     * @brief Set the Default Fill Value for CanTp frame in case payloadLength < CanTp frame length (8 bytes)
+     *
+     * @param defaultFill - fill pattern
+     */
     void SetDefaultFillValue(uint8_t defaultFill)
     {
         m_defaultFill = defaultFill;
@@ -101,7 +147,7 @@ public:
      * @brief Set the Custom Frame Generator function
      *
      * @param frameType CanTp Frame Type
-     * @param pfGenerateFrame Custom GenerateFrame() method for corresponding 'frameType'
+     * @param pfGenerateFrame Custom GenerateFrame() method for corresponding @ref frameType
      */
     void SetCustomFrameGenerator(CanTpFrames frameType, pfGenerator pfGenerateFrame);
 };

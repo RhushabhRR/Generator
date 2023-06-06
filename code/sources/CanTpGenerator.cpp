@@ -37,18 +37,18 @@ bool CanTpGenerator::GenerateMsg(uint16_t msgLength, std::vector<std::vector<uin
     {
         if (msgLength < CANTP_PAYLOAD_BYTES_IN_SF)
         {
-            GenerateFrame(CanTpFrames::CANTP_SINGLE_FRAME, msgLength, msg[0]);
+            success = GenerateFrame(CanTpFrames::CANTP_SINGLE_FRAME, msgLength, msg[0]);
         }
         else
         {
-            GenerateFrame(CanTpFrames::CANTP_FIRST_FRAME, msgLength, msg[0]);
+            success = GenerateFrame(CanTpFrames::CANTP_FIRST_FRAME, msgLength, msg[0]);
 
             uint8_t seqNum = 0;
 
-            for (uint16_t idx = 1; idx < reqFrames; idx++)
+            for (uint16_t idx = 1; success && (idx < reqFrames); idx++)
             {
                 seqNum %= 0x10;
-                GenerateFrame(CanTpFrames::CANTP_CONSECUTIVE_FRAME, msgLength, msg[idx], seqNum);
+                success = GenerateFrame(CanTpFrames::CANTP_CONSECUTIVE_FRAME, msgLength, msg[idx], seqNum);
                 seqNum += 1;
             }
         }
@@ -81,8 +81,9 @@ uint16_t CanTpGenerator::RequiredFrames(uint16_t msgLength)
     return totalFrames;
 }
 
-void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, std::vector<uint8_t> &payload, uint8_t seqNum)
+bool CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, std::vector<uint8_t> &payload, uint8_t seqNum)
 {
+    bool success = false;
     assert(frameType < CanTpFrames::TOTAL_FRAME_TYPES);
 
     switch (frameType)
@@ -102,6 +103,7 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
                 _WRITE_PCI_INFO(itrFrameType->second.pciInfo, payload);
                 payload[CANTP_PCI_INFO_OFFSET] |= (payloadLength & 0x0F);
             }
+            success = true;
         }
     }
     break;
@@ -124,6 +126,7 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
                 payload[CANTP_FF_DL_INFO_OFFSET] &= 0x00; // Clear 2nd byte
                 payload[CANTP_FF_DL_INFO_OFFSET] |= ((payloadLength)&0xFF);
             }
+            success = true;
         }
     }
     break;
@@ -144,6 +147,7 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
                 _WRITE_PCI_INFO(itrFrameType->second.pciInfo, payload);
                 payload[CANTP_PCI_INFO_OFFSET] |= (seqNum & 0x0F);
             }
+            success = true;
         }
     }
     break;
@@ -167,6 +171,7 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
                 payload[CANTP_FC_BLOCKSIZE_OFFSET] = m_blockSize;
                 payload[CANTP_FC_STMIN_OFFSET] = m_stmin;
             }
+            success = true;
         }
     }
     break;
@@ -174,6 +179,8 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
     default:
         break;
     }
+
+    return success;
 }
 
 void CanTpGenerator::SetConfigParam(uint8_t fcFlag, uint8_t blockSize, uint8_t stmin)
