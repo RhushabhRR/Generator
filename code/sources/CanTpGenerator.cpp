@@ -1,13 +1,12 @@
 #include <iostream>
 #include <iomanip>
-#include <array>
 #include <cassert>
 
 #include "CanTpGenerator.h"
 #include "CanTpGeneratorUserCfg.h"
 
 #define _WRITE_PCI_INFO(pciInfo, payload) \
-    payload[0] = (pciInfo << 4) & 0xF
+    payload[0] = ((pciInfo & 0x0F) << 4)
 
 CanTpGenerator::CanTpGenerator()
 {
@@ -93,10 +92,10 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
         auto itrFrameType = CanTpFrameFormat.find(frameType);
         if (itrFrameType != CanTpFrameFormat.end())
         {
-            if (itrFrameType->second.pfWritePayload != NULL)
+            if (itrFrameType->second.pfGenerateFrame != NULL)
             {
                 // Custom payload generator
-                itrFrameType->second.pfWritePayload(payloadLength, payload);
+                itrFrameType->second.pfGenerateFrame(payloadLength, payload);
             }
             else
             {
@@ -112,10 +111,10 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
         auto itrFrameType = CanTpFrameFormat.find(frameType);
         if (itrFrameType != CanTpFrameFormat.end())
         {
-            if (itrFrameType->second.pfWritePayload != NULL)
+            if (itrFrameType->second.pfGenerateFrame != NULL)
             {
                 // Custom payload generator
-                itrFrameType->second.pfWritePayload(payloadLength, payload);
+                itrFrameType->second.pfGenerateFrame(payloadLength, payload);
             }
             else
             {
@@ -134,10 +133,10 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
         auto itrFrameType = CanTpFrameFormat.find(frameType);
         if (itrFrameType != CanTpFrameFormat.end())
         {
-            if (itrFrameType->second.pfWritePayload != NULL)
+            if (itrFrameType->second.pfGenerateFrame != NULL)
             {
                 // Custom payload generator
-                itrFrameType->second.pfWritePayload(payloadLength, payload);
+                itrFrameType->second.pfGenerateFrame(payloadLength, payload);
             }
             else
             {
@@ -154,10 +153,10 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
         auto itrFrameType = CanTpFrameFormat.find(frameType);
         if (itrFrameType != CanTpFrameFormat.end())
         {
-            if (itrFrameType->second.pfWritePayload != NULL)
+            if (itrFrameType->second.pfGenerateFrame != NULL)
             {
                 // Custom payload generator
-                itrFrameType->second.pfWritePayload(payloadLength, payload);
+                itrFrameType->second.pfGenerateFrame(payloadLength, payload);
             }
             else
             {
@@ -184,32 +183,37 @@ void CanTpGenerator::SetConfigParam(uint8_t fcFlag, uint8_t blockSize, uint8_t s
     m_stmin = stmin;
 }
 
-int main()
+void CanTpGenerator::SetCustomFrameGenerator(CanTpFrames frameType, pfGenerator pfGenerateFrame)
 {
-    CanTpGenerator generator;
-    uint16_t payloadLength = 0xffe;
-    std::vector<std::vector<uint8_t>> payload;
+    assert(frameType < CanTpFrames::TOTAL_FRAME_TYPES);
 
-    std::vector<uint8_t> frame(8, 0x45);
-
-    generator.GenerateFrame(CanTpFrames::CANTP_SINGLE_FRAME, 3, frame);
-
-    for (auto &data : frame)
+    switch (frameType)
     {
-        std::cout << "0x" << std::setfill('0') << std::setw(2) << std::hex << +data << ", ";
+    case CanTpFrames::CANTP_SINGLE_FRAME:
+    {
+        CanTpFrameFormat[CanTpFrames::CANTP_SINGLE_FRAME].pfGenerateFrame = pfGenerateFrame;
     }
+    break;
 
-    // generator.SetDefaultFillValue(0x45);
-    // generator.GenerateMsg(payloadLength, payload);
+    case CanTpFrames::CANTP_FIRST_FRAME:
+    {
+        CanTpFrameFormat[CanTpFrames::CANTP_FIRST_FRAME].pfGenerateFrame = pfGenerateFrame;
+    }
+    break;
 
-    // for (auto &frame : payload)
-    // {
-    //     for (auto &data : frame)
-    //     {
-    //         std::cout << "0x" << std::setfill('0') << std::setw(2) << std::hex << +data << ", ";
-    //     }
-    //     std::cout << std::endl;
-    // }
+    case CanTpFrames::CANTP_CONSECUTIVE_FRAME:
+    {
+        CanTpFrameFormat[CanTpFrames::CANTP_CONSECUTIVE_FRAME].pfGenerateFrame = pfGenerateFrame;
+    }
+    break;
 
-    return 0;
+    case CanTpFrames::CANTP_FLOW_CONTROL_FRAME:
+    {
+        CanTpFrameFormat[CanTpFrames::CANTP_FLOW_CONTROL_FRAME].pfGenerateFrame = pfGenerateFrame;
+    }
+    break;
+
+    default:
+        break;
+    }
 }

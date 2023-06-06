@@ -28,8 +28,3 @@ install(TARGETS ${_LIB}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 
-
-#Create executable
-add_executable(APP_CanTpGenerator ${_SOURCES})
-target_link_libraries(APP_CanTpGenerator ${_LIB})
-

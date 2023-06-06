@@ -31,10 +31,12 @@ enum class CanTpFrames : uint8_t
     TOTAL_FRAME_TYPES = 4
 };
 
+typedef void (*pfGenerator)(uint16_t, std::vector<uint8_t> &);
+
 struct CanTpProtocolData
 {
-    uint8_t pciInfo;                                                               // Use '+' unary oerator to print uint8_t on console
-    void (*pfWritePayload)(uint16_t payloadLength, std::vector<uint8_t> &payload); // Function to be called to generate payload
+    uint8_t pciInfo;
+    pfGenerator pfGenerateFrame; // Function to be called to generate payload
 };
 
 class FrameGenerator
@@ -94,4 +96,12 @@ public:
     {
         m_defaultFill = defaultFill;
     }
+
+    /**
+     * @brief Set the Custom Frame Generator function
+     *
+     * @param frameType CanTp Frame Type
+     * @param pfGenerateFrame Custom GenerateFrame() method for corresponding 'frameType'
+     */
+    void SetCustomFrameGenerator(CanTpFrames frameType, pfGenerator pfGenerateFrame);
 };
