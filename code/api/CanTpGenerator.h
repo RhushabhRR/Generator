@@ -3,19 +3,21 @@
 #include <vector>
 #include <unordered_map>
 
+// Offsets
 #define CANTP_PCI_INFO_OFFSET 0
 #define CANTP_FF_DL_INFO_OFFSET 1
 #define CANTP_FC_CONTROLFLOW_OFFSET 0
 #define CANTP_FC_BLOCKSIZE_OFFSET 1
 #define CANTP_FC_STMIN_OFFSET 2
 
+// PCI info
 #define CANTP_PCI_SINGLE_FRAME 0
 #define CANTP_PCI_FIRST_FRAME 1
 #define CANTP_PCI_CONSECUTIVE_FRAME 2
 #define CANTP_PCI_FLOWCONTROL_FRAME 3
 
+// Payload Lengths
 #define CANTP_MAX_PAYLOAD_LENGTH 4096
-
 #define CANTP_PAYLOAD_BYTES_IN_SF 7
 #define CANTP_PAYLOAD_BYTES_IN_FF 6
 #define CANTP_PAYLOAD_BYTES_IN_CF 7
@@ -75,7 +77,7 @@ private:
     uint8_t m_blockSize = 5;
     uint8_t m_stmin = 10; // ms
 
-private:
+private: // helper
     uint16_t RequiredFrames(uint16_t msgLength);
 
 public:

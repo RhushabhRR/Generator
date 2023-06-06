@@ -6,10 +6,8 @@
 #include "CanTpGenerator.h"
 #include "CanTpGeneratorUserCfg.h"
 
-#define CAN_FRAME_LENGTH 8
-
-#define _WRITE_PCI_INFO(payload, pci_info) \
-    payload[0] |= ((0xF & pci_info) << 4)
+#define _WRITE_PCI_INFO(pciInfo, payload) \
+    payload[0] = (pciInfo << 4) & 0xF
 
 CanTpGenerator::CanTpGenerator()
 {
@@ -102,8 +100,7 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
             }
             else
             {
-                payload[CANTP_PCI_INFO_OFFSET] &= 0x00; // Clear 1st byte
-                payload[CANTP_PCI_INFO_OFFSET] |= ((itrFrameType->second.pciInfo << 4) & 0xF0);
+                _WRITE_PCI_INFO(itrFrameType->second.pciInfo, payload);
                 payload[CANTP_PCI_INFO_OFFSET] |= (payloadLength & 0x0F);
             }
         }
@@ -122,8 +119,7 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
             }
             else
             {
-                payload[CANTP_PCI_INFO_OFFSET] &= 0x00; // Clear 1st byte
-                payload[CANTP_PCI_INFO_OFFSET] |= ((itrFrameType->second.pciInfo << 4) & 0xF0);
+                _WRITE_PCI_INFO(itrFrameType->second.pciInfo, payload);
                 payload[CANTP_PCI_INFO_OFFSET] |= ((payloadLength >> 8) & 0x0F);
 
                 payload[CANTP_FF_DL_INFO_OFFSET] &= 0x00; // Clear 2nd byte
@@ -146,8 +142,7 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
             else
             {
                 assert(seqNum <= 0xF);
-                payload[CANTP_PCI_INFO_OFFSET] &= 0x00; // Clear 1st byte
-                payload[CANTP_PCI_INFO_OFFSET] |= ((itrFrameType->second.pciInfo << 4) & 0xF0);
+                _WRITE_PCI_INFO(itrFrameType->second.pciInfo, payload);
                 payload[CANTP_PCI_INFO_OFFSET] |= (seqNum & 0x0F);
             }
         }
@@ -166,8 +161,7 @@ void CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
             }
             else
             {
-                payload[CANTP_PCI_INFO_OFFSET] &= 0x00; // Clear 1st byte
-                payload[CANTP_PCI_INFO_OFFSET] |= ((itrFrameType->second.pciInfo << 4) & 0xF0);
+                _WRITE_PCI_INFO(itrFrameType->second.pciInfo, payload);
                 payload[CANTP_PCI_INFO_OFFSET] |= (seqNum & 0x0F);
 
                 payload[CANTP_FC_CONTROLFLOW_OFFSET] |= (m_fcFlag & 0xF);
@@ -198,7 +192,7 @@ int main()
 
     std::vector<uint8_t> frame(8, 0x45);
 
-    generator.GenerateFrame(CanTpFrames::CANTP_FLOW_CONTROL_FRAME, 3, frame);
+    generator.GenerateFrame(CanTpFrames::CANTP_SINGLE_FRAME, 3, frame);
 
     for (auto &data : frame)
     {
