@@ -3,6 +3,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "CanTpGeneratorUserCfg.h"
+
 // Offsets
 #define CANTP_PCI_INFO_OFFSET 0
 #define CANTP_FF_DL_INFO_OFFSET 1
@@ -75,8 +77,8 @@ private:
     std::unordered_map<CanTpFrames, CanTpProtocolData> CanTpFrameFormat;
 
     uint8_t m_fcFlag = 0;
-    uint8_t m_blockSize = 5;
-    uint8_t m_stmin = 10; // ms
+    uint8_t m_blockSize = CANTP_DEFAULT_BLOCK_SIZE;
+    uint8_t m_stmin = CANTP_DEFAULT_SEPERATION_TIME; // ms
 
 private: // helper
     uint16_t RequiredFrames(uint16_t msgLength);
