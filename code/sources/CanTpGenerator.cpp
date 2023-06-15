@@ -3,17 +3,16 @@
 #include <cassert>
 
 #include "CanTpGenerator.h"
-#include "CanTpGeneratorUserCfg.h"
 
 #define _WRITE_PCI_INFO(pciInfo, payload) \
     payload[0] = ((pciInfo & 0x0F) << 4)
 
 CanTpGenerator::CanTpGenerator()
 {
-    CanTpFrameFormat[CanTpFrames::CANTP_SINGLE_FRAME] = {CANTP_PCI_SINGLE_FRAME, NULL};
-    CanTpFrameFormat[CanTpFrames::CANTP_FIRST_FRAME] = {CANTP_PCI_FIRST_FRAME, NULL};
-    CanTpFrameFormat[CanTpFrames::CANTP_CONSECUTIVE_FRAME] = {CANTP_PCI_CONSECUTIVE_FRAME, NULL};
-    CanTpFrameFormat[CanTpFrames::CANTP_FLOW_CONTROL_FRAME] = {CANTP_PCI_FLOWCONTROL_FRAME, NULL};
+    m_canTpFrames[CanTpFrames::CANTP_SINGLE_FRAME] = {CANTP_PCI_SINGLE_FRAME, NULL};
+    m_canTpFrames[CanTpFrames::CANTP_FIRST_FRAME] = {CANTP_PCI_FIRST_FRAME, NULL};
+    m_canTpFrames[CanTpFrames::CANTP_CONSECUTIVE_FRAME] = {CANTP_PCI_CONSECUTIVE_FRAME, NULL};
+    m_canTpFrames[CanTpFrames::CANTP_FLOW_CONTROL_FRAME] = {CANTP_PCI_FLOWCONTROL_FRAME, NULL};
 }
 
 bool CanTpGenerator::ReadConfig()
@@ -97,8 +96,8 @@ bool CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
     {
     case CanTpFrames::CANTP_SINGLE_FRAME:
     {
-        auto itrFrameType = CanTpFrameFormat.find(frameType);
-        if (itrFrameType != CanTpFrameFormat.end())
+        auto itrFrameType = m_canTpFrames.find(frameType);
+        if (itrFrameType != m_canTpFrames.end())
         {
             if (itrFrameType->second.pfGenerateFrame != NULL)
             {
@@ -117,8 +116,8 @@ bool CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
 
     case CanTpFrames::CANTP_FIRST_FRAME:
     {
-        auto itrFrameType = CanTpFrameFormat.find(frameType);
-        if (itrFrameType != CanTpFrameFormat.end())
+        auto itrFrameType = m_canTpFrames.find(frameType);
+        if (itrFrameType != m_canTpFrames.end())
         {
             if (itrFrameType->second.pfGenerateFrame != NULL)
             {
@@ -140,8 +139,8 @@ bool CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
 
     case CanTpFrames::CANTP_CONSECUTIVE_FRAME:
     {
-        auto itrFrameType = CanTpFrameFormat.find(frameType);
-        if (itrFrameType != CanTpFrameFormat.end())
+        auto itrFrameType = m_canTpFrames.find(frameType);
+        if (itrFrameType != m_canTpFrames.end())
         {
             if (itrFrameType->second.pfGenerateFrame != NULL)
             {
@@ -161,8 +160,8 @@ bool CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
 
     case CanTpFrames::CANTP_FLOW_CONTROL_FRAME:
     {
-        auto itrFrameType = CanTpFrameFormat.find(frameType);
-        if (itrFrameType != CanTpFrameFormat.end())
+        auto itrFrameType = m_canTpFrames.find(frameType);
+        if (itrFrameType != m_canTpFrames.end())
         {
             if (itrFrameType->second.pfGenerateFrame != NULL)
             {
@@ -200,30 +199,31 @@ void CanTpGenerator::SetConfigParam(uint8_t fcFlag, uint8_t blockSize, uint8_t s
 void CanTpGenerator::SetCustomFrameGenerator(CanTpFrames frameType, pfGenerator pfGenerateFrame)
 {
     assert(frameType < CanTpFrames::TOTAL_FRAME_TYPES);
+    assert(pfGenerateFrame != NULL);
 
     switch (frameType)
     {
     case CanTpFrames::CANTP_SINGLE_FRAME:
     {
-        CanTpFrameFormat[CanTpFrames::CANTP_SINGLE_FRAME].pfGenerateFrame = pfGenerateFrame;
+        m_canTpFrames[CanTpFrames::CANTP_SINGLE_FRAME].pfGenerateFrame = pfGenerateFrame;
     }
     break;
 
     case CanTpFrames::CANTP_FIRST_FRAME:
     {
-        CanTpFrameFormat[CanTpFrames::CANTP_FIRST_FRAME].pfGenerateFrame = pfGenerateFrame;
+        m_canTpFrames[CanTpFrames::CANTP_FIRST_FRAME].pfGenerateFrame = pfGenerateFrame;
     }
     break;
 
     case CanTpFrames::CANTP_CONSECUTIVE_FRAME:
     {
-        CanTpFrameFormat[CanTpFrames::CANTP_CONSECUTIVE_FRAME].pfGenerateFrame = pfGenerateFrame;
+        m_canTpFrames[CanTpFrames::CANTP_CONSECUTIVE_FRAME].pfGenerateFrame = pfGenerateFrame;
     }
     break;
 
     case CanTpFrames::CANTP_FLOW_CONTROL_FRAME:
     {
-        CanTpFrameFormat[CanTpFrames::CANTP_FLOW_CONTROL_FRAME].pfGenerateFrame = pfGenerateFrame;
+        m_canTpFrames[CanTpFrames::CANTP_FLOW_CONTROL_FRAME].pfGenerateFrame = pfGenerateFrame;
     }
     break;
 

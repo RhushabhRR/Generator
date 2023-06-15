@@ -62,19 +62,22 @@ int main()
     generator.SetCustomFrameGenerator(CanTpFrames::CANTP_SINGLE_FRAME, GenerateSingleFrame);
     generator.SetCustomFrameGenerator(CanTpFrames::CANTP_FIRST_FRAME, GenerateFirstFrame);
 
-    uint16_t payloadLength = 14;
-    std::vector<std::vector<uint8_t>> payload;
+    uint16_t payloadLength = 0x100;
 
-    generator.GenerateMsg(payloadLength, payload);
-
-    for (auto &frame : payload)
+    // Example to generate entire message
     {
-        for (auto &data : frame)
+        std::vector<std::vector<uint8_t>> payload;
+        generator.GenerateMsg(payloadLength, payload);
+
+        for (auto &frame : payload)
         {
-            // Use '+' unary oerator to print uint8_t on console
-            std::cout << "0x" << std::setfill('0') << std::setw(2) << std::hex << +data << ", ";
+            for (auto &data : frame)
+            {
+                // Use '+' unary oerator to print uint8_t on console
+                std::cout << "0x" << std::setfill('0') << std::setw(2) << std::hex << +data << ", ";
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
     }
 
     // Example to generate specific frame
@@ -82,12 +85,12 @@ int main()
         // std::vector<uint8_t> frame(8, 0x45);
         // generator.GenerateFrame(CanTpFrames::CANTP_CONSECUTIVE_FRAME, payloadLength, frame, 3);
 
-        //  for (auto &data : frame)
-        //     {
-        //         // Use '+' unary oerator to print uint8_t on console
-        //         std::cout << "0x" << std::setfill('0') << std::setw(2) << std::hex << +data << ", ";
-        //     }
-        //     std::cout << std::endl;
+        // for (auto &data : frame)
+        // {
+        //     // Use '+' unary oerator to print uint8_t on console
+        //     std::cout << "0x" << std::setfill('0') << std::setw(2) << std::hex << +data << ", ";
+        // }
+        // std::cout << std::endl;
     }
 
     return 0;
