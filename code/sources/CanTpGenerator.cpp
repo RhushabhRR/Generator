@@ -31,25 +31,29 @@ bool CanTpGenerator::GenerateMsg(uint16_t msgLength, std::vector<std::vector<uin
     bool success = false;
 
     uint16_t reqFrames = RequiredFrames(msgLength);
-    msg.resize(reqFrames, std::vector<uint8_t>(CANTP_FRAME_LENGTH, m_defaultFill));
 
-    if (msgLength < CANTP_MAX_PAYLOAD_LENGTH)
+    if (reqFrames != 0)
     {
-        if (msgLength < CANTP_PAYLOAD_BYTES_IN_SF)
-        {
-            success = GenerateFrame(CanTpFrames::CANTP_SINGLE_FRAME, msgLength, msg[0]);
-        }
-        else
-        {
-            success = GenerateFrame(CanTpFrames::CANTP_FIRST_FRAME, msgLength, msg[0]);
+        msg.resize(reqFrames, std::vector<uint8_t>(CANTP_FRAME_LENGTH, m_defaultFill));
 
-            uint8_t seqNum = 0;
-
-            for (uint16_t idx = 1; success && (idx < reqFrames); idx++)
+        if (msgLength < CANTP_MAX_PAYLOAD_LENGTH)
+        {
+            if (msgLength < CANTP_PAYLOAD_BYTES_IN_SF)
             {
-                seqNum %= 0x10;
-                success = GenerateFrame(CanTpFrames::CANTP_CONSECUTIVE_FRAME, msgLength, msg[idx], seqNum);
-                seqNum += 1;
+                success = GenerateFrame(CanTpFrames::CANTP_SINGLE_FRAME, msgLength, msg[0]);
+            }
+            else
+            {
+                success = GenerateFrame(CanTpFrames::CANTP_FIRST_FRAME, msgLength, msg[0]);
+
+                uint8_t seqNum = 0;
+
+                for (uint16_t idx = 1; success && (idx < reqFrames); idx++)
+                {
+                    seqNum %= 0x10;
+                    success = GenerateFrame(CanTpFrames::CANTP_CONSECUTIVE_FRAME, msgLength, msg[idx], seqNum);
+                    seqNum += 1;
+                }
             }
         }
     }
@@ -66,15 +70,18 @@ uint16_t CanTpGenerator::RequiredFrames(uint16_t msgLength)
     }
     else if (msgLength < CANTP_MAX_PAYLOAD_LENGTH)
     {
-        uint16_t payloadCounter = 0;
-
-        payloadCounter += CANTP_PAYLOAD_BYTES_IN_FF;
+        msgLength -= CANTP_PAYLOAD_BYTES_IN_FF;
         totalFrames += 1;
 
-        while (payloadCounter < msgLength)
+        while (msgLength >= CANTP_PAYLOAD_BYTES_IN_CF)
         {
             totalFrames += 1;
-            payloadCounter += CANTP_PAYLOAD_BYTES_IN_CF;
+            msgLength -= CANTP_PAYLOAD_BYTES_IN_CF;
+        }
+
+        if ((msgLength != 0) && (msgLength < CANTP_PAYLOAD_BYTES_IN_CF))
+        {
+            totalFrames++;
         }
     }
 

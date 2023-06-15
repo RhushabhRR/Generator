@@ -46,7 +46,7 @@ public:
     virtual ~FrameGenerator() {}
 
     /**
-     * @brief
+     * @brief Generates a complete message consisting of single/multiple frames depending on @ref msgLength
      *
      * @param msgLength - Length of overall message to be generated
      * @param msg - Provide an empty 2D Vector - [frame][data] - will be resized inside the method
@@ -86,7 +86,7 @@ public:
     ~CanTpGenerator(){};
 
     /**
-     * @brief
+     * @brief Generates a complete message consisting of single/multiple frames depending on @ref msgLength
      *
      * @param msgLength - Length of overall message to be generated
      * @param msg - Provide an empty 2D Vector - [frame][data] - will be resized inside the method
