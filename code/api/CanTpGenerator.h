@@ -123,10 +123,10 @@ public:
     void SetConfigParam(uint8_t fcFlag, uint8_t blockSize, uint8_t stmin);
 
     /**
-     * @brief Generate a CanTp Frame based on @ref frameType
+     * @brief Generate a single CanTp Frame based on @ref frameType
      *
      * @param frameType - Type of CanTp frame to be generated
-     * @param payloadLength - Length of payload in corresponding CanTp frame. F
+     * @param payloadLength - Length of payload in corresponding CanTp frame.
      * @note - For flow control frame - @ref payloadLength is unused
      * @param payload - an empty vector in which frame will be generated
      * @param seqNum - Used only for Consecutive frame

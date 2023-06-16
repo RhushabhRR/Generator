@@ -92,6 +92,11 @@ bool CanTpGenerator::GenerateFrame(CanTpFrames frameType, uint16_t payloadLength
     bool success = false;
     assert(frameType < CanTpFrames::TOTAL_FRAME_TYPES);
 
+    if (payload.capacity() != CANTP_FRAME_LENGTH)
+    {
+        payload.resize(CANTP_FRAME_LENGTH);
+    }
+
     switch (frameType)
     {
     case CanTpFrames::CANTP_SINGLE_FRAME:
