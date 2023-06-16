@@ -35,7 +35,7 @@ void GenerateFirstFrame(uint16_t msgLength, std::vector<uint8_t> &payload)
     // Custom payload
     for (uint8_t idx = 2; idx < CanTpFrameLength; idx++)
     {
-        payload[idx] = idx * 5;
+        payload[idx] = idx;
     }
 }
 void GenerateConsecutiveFrame(uint16_t seqNum, std::vector<uint8_t> &payload)
@@ -46,10 +46,10 @@ void GenerateConsecutiveFrame(uint16_t seqNum, std::vector<uint8_t> &payload)
 
     // PCI Info
     payload[0] = 0x20;
-    payload[0] |= ((seqNum >> 8) & 0xF);
+    payload[0] |= (seqNum & 0xF);
 
     // Custom payload
-    for (uint8_t idx = 2; idx < CanTpFrameLength; idx++)
+    for (uint8_t idx = 1; idx < CanTpFrameLength; idx++)
     {
         payload[idx] = idx * 2;
     }
@@ -59,10 +59,15 @@ int main()
 {
     CanTpGenerator generator;
 
-    generator.SetCustomFrameGenerator(CanTpFrames::CANTP_SINGLE_FRAME, GenerateSingleFrame);
-    generator.SetCustomFrameGenerator(CanTpFrames::CANTP_FIRST_FRAME, GenerateFirstFrame);
+    // OPTIONAL - if not provided, default frame generator will be used, with deafult fill value
+    // Use SetDefaultFillValue(uint8_t defaultVal) to change default fill
+    {
+        generator.SetCustomFrameGenerator(CanTpFrames::CANTP_SINGLE_FRAME, GenerateSingleFrame);
+        generator.SetCustomFrameGenerator(CanTpFrames::CANTP_FIRST_FRAME, GenerateFirstFrame);
+        generator.SetCustomFrameGenerator(CanTpFrames::CANTP_CONSECUTIVE_FRAME, GenerateConsecutiveFrame);
+    }
 
-    uint16_t payloadLength = 0x100;
+    uint16_t payloadLength = 140;
 
     // Example to generate entire message
     {
@@ -82,8 +87,8 @@ int main()
 
     // Example to generate specific frame
     {
-        // std::vector<uint8_t> frame(8, 0x45);
-        // generator.GenerateFrame(CanTpFrames::CANTP_CONSECUTIVE_FRAME, payloadLength, frame, 3);
+        // std::vector<uint8_t> frame(8, 0x45); //Or an empty frame can be passed
+        // generator.GenerateSingleFrame(payloadLength, frame);
 
         // for (auto &data : frame)
         // {

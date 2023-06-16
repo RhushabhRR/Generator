@@ -123,21 +123,8 @@ public:
     void SetConfigParam(uint8_t fcFlag, uint8_t blockSize, uint8_t stmin);
 
     /**
-     * @brief Generate a single CanTp Frame based on @ref frameType
-     *
-     * @param frameType - Type of CanTp frame to be generated
-     * @param payloadLength - Length of payload in corresponding CanTp frame.
-     * @note - For flow control frame - @ref payloadLength is unused
-     * @param payload - an empty vector in which frame will be generated
-     * @param seqNum - Used only for Consecutive frame
-     * @return true
-     * @return false
-     */
-    bool GenerateFrame(CanTpFrames frameType, uint16_t payloadLength, std::vector<uint8_t> &payload, uint8_t seqNum = 0xFF);
-
-    /**
      * @brief Set the Default Fill Value for CanTp frame in case payloadLength < CanTp frame length (8 bytes)
-     *
+     * @note - This is OPTIONAL
      * @param defaultFill - fill pattern
      */
     void SetDefaultFillValue(uint8_t defaultFill)
@@ -153,4 +140,14 @@ public:
      * @param pfGenerateFrame Custom GenerateFrame() method for corresponding @ref frameType
      */
     void SetCustomFrameGenerator(CanTpFrames frameType, pfGenerator pfGenerateFrame);
+
+    /**
+     * @brief Generate specific type of frame
+     * @note - If vector do not have valid length, it'll be resized
+     *
+     */
+    bool GenerateSingleFrame(uint16_t payloadLength, std::vector<uint8_t> &payload);
+    bool GenerateFirstFrame(uint16_t payloadLength, std::vector<uint8_t> &payload);
+    bool GenerateConsecutiveFrame(std::vector<uint8_t> &payload, uint8_t sequenceNumber);
+    bool GenerateFlowControlFrame(std::vector<uint8_t> &payload, uint8_t fcFlag, uint8_t blockSize, uint8_t stmin);
 };
